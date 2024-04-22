@@ -17,7 +17,7 @@ use lora_phy::LoRa;
 use lora_phy::{mod_params::*, sx127x};
 use {defmt_rtt as _, panic_probe as _};
 
-const LORA_FREQUENCY_IN_HZ: u32 = 433_900_000; // warning: set this appropriately for the region
+const LORA_FREQUENCY_IN_HZ: u32 = 434_000_000; // warning: set this appropriately for the region
 
 #[embassy_executor::main]
 async fn main(_spawner: Spawner) {
@@ -28,8 +28,8 @@ async fn main(_spawner: Spawner) {
 
     let nss = Output::new(p.PA4.degrade(), Level::High, Speed::Low);
     let reset = Output::new(p.PA3.degrade(), Level::High, Speed::Low);
-    let irq_pin = Input::new(p.PA2.degrade(), Pull::Up);
-    let irq = ExtiInput::new(irq_pin, p.EXTI2.degrade());
+    let irq_pin = Input::new(p.PA9.degrade(), Pull::Up);
+    let irq = ExtiInput::new(irq_pin, p.EXTI9.degrade());
 
     let mut spi_config = spi::Config::default();
     spi_config.frequency = khz(200);
@@ -40,7 +40,7 @@ async fn main(_spawner: Spawner) {
 
     let config = sx127x::Config {
         chip: Sx1276,
-        tcxo_used: true,
+        tcxo_used: false,
         rx_boost: false,
         tx_boost: true,
     };
@@ -51,8 +51,8 @@ async fn main(_spawner: Spawner) {
 
     let mdltn_params = {
         match lora.create_modulation_params(
-            SpreadingFactor::_10,
-            Bandwidth::_250KHz,
+            SpreadingFactor::_12,
+            Bandwidth::_10KHz,
             CodingRate::_4_8,
             LORA_FREQUENCY_IN_HZ,
         ) {
